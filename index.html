@@ -2,9 +2,20 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MashLab v1.1 - Mobile Edition</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MashLab v1.1 - Studio</title>
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#050508">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MashLab Studio">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- Iconos PWA -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f1f1f' width='100' height='100' rx='20'/><path d='M35 75V25l35-5v45M25 75a10 10 0 1 0 20 0 10 10 0 1 0-20 0M55 65a10 10 0 1 0 20 0 10 10 0 1 0-20 0' fill='none' stroke='%2300ff88' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f1f1f' width='100' height='100' rx='20'/><path d='M35 75V25l35-5v45M25 75a10 10 0 1 0 20 0 10 10 0 1 0-20 0M55 65a10 10 0 1 0 20 0 10 10 0 1 0-20 0' fill='none' stroke='%2300ff88' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
 <style>
   :root {
     --bg-gradient: linear-gradient(135deg, #050508 0%, #0a0a15 50%, #050508 100%);
@@ -18,183 +29,264 @@
     --blue: #3b82f6;
     --down: #ff3366;
     --accent: #ffffff;
-    --linktree: #43e55e;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
   
   body {
-    margin: 0; min-height: 100vh;
+    margin: 0; padding: 0;
+    min-height: 100vh;
     background: var(--bg-gradient);
     background-attachment: fixed;
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
     overflow-x: hidden;
+    overflow-y: auto;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .container { max-width: 1000px; margin: 0 auto; padding: 12px 12px 80px; }
+  .container { max-width: 1000px; margin: 0 auto; padding: 12px 12px 120px; }
 
-  /* Topbar Mobile Friendly */
+  /* Navbar */
   .topbar {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(5, 5, 10, 0.85);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(5, 5, 10, 0.9);
+    backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
     border-bottom: 1px solid var(--glass-border);
   }
   .topbar-inner {
     display: flex; align-items: center; justify-content: space-between;
-    height: 60px; max-width: 1000px; margin: 0 auto; padding: 0 16px;
+    height: 75px; max-width: 1000px; margin: 0 auto; padding: 0 16px;
   }
+  .brand-logo { font-weight: 900; font-size: 20px; letter-spacing: -0.5px; }
+  .mode-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .mode-legend { font-size: 10px; color: var(--sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
 
-  /* Gestión de Clips */
+  /* Donación */
+  .donation-banner {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px; padding: 20px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 15px;
+    backdrop-filter: blur(15px);
+  }
+  @media(max-width: 650px) { .donation-banner { flex-direction: column; text-align: center; } }
+
+  /* Paneles */
   .panel {
     background: var(--glass);
     border: 1px solid var(--glass-border);
-    border-radius: 24px; padding: 20px; margin-bottom: 24px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+    border-radius: 28px; padding: 20px; margin-bottom: 24px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.7);
   }
 
-  h2 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
-  h3 { margin: 0 0 12px 0; font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
+  h2 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+  h3 { margin: 0 0 14px 0; font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 2px; font-weight: 900; }
 
-  .song-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media(max-width:768px){ .song-grid { grid-template-columns: 1fr; gap: 16px; } }
+  .song-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
 
   .song-item {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
-    border-radius: 18px; padding: 12px;
-    display: grid; grid-template-columns: 1fr 90px 40px; gap: 10px;
-    align-items: center; margin-bottom: 10px;
-  }
-  @media(max-width:480px) {
-    .song-item { grid-template-columns: 1fr 80px 30px; gap: 8px; padding: 10px; }
-    .input, .select { font-size: 12px; padding: 8px; }
+    border-radius: 20px; padding: 14px;
+    display: grid; grid-template-columns: 1fr 100px 40px; gap: 12px;
+    align-items: center; margin-bottom: 12px;
   }
 
   .input, .select {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     border: 1px solid var(--glass-border);
-    color: #fff; padding: 10px; border-radius: 12px;
+    color: #fff; padding: 12px; border-radius: 14px;
+    font-size: 14px; width: 100%;
   }
 
-  /* Rueda Interactiva */
-  .wheel-container {
+  /* Rueda Camelot */
+  .wheel-wrapper {
     display: flex; flex-direction: column; align-items: center;
-    background: rgba(0,0,0,0.4); border-radius: 36px; padding: 24px;
+    background: rgba(0,0,0,0.5); border-radius: 40px; padding: 30px 20px;
     border: 1px solid var(--glass-border); margin-bottom: 24px;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
   }
-  svg.camelot-wheel { width: 100%; max-width: 480px; height: auto; transform: rotate(-15deg); }
-  .segment { cursor: pointer; transition: 0.2s; }
+  
+  .wheel-ring {
+    width: 100%; max-width: 480px; aspect-ratio: 1/1;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 75%);
+    border-radius: 50%;
+  }
 
-  /* Análisis Armónico */
+  svg.camelot-wheel { width: 100%; height: 100%; transform: rotate(-15deg); }
+  
+  .segment-group { cursor: pointer; }
+  .segment { transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); stroke: rgba(0,0,0,0.2); stroke-width: 0.5; }
+  .segment-group:hover .segment { filter: brightness(1.2); }
+  .segment.ghost { filter: drop-shadow(0 0 12px currentColor); opacity: 1; }
+  .segment.active { stroke: #fff; stroke-width: 3px; }
+
+  /* Resultados con Neón */
   .analysis-card {
     background: var(--glass);
-    border-radius: 28px; padding: 20px; margin-bottom: 20px;
+    border-radius: 30px; padding: 24px; margin-bottom: 20px;
     border: 1px solid var(--glass-border);
   }
-  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 15px; }
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 12px; margin-top: 20px; }
   
-  @media(max-width:600px) {
-    .options-grid { grid-template-columns: 1fr 1fr; }
-    .opt-box { padding: 10px; }
-  }
-
   .opt-box {
     background: rgba(255, 255, 255, 0.02);
-    padding: 12px; border-radius: 16px; border: 1px solid var(--glass-border);
-    text-align: center; cursor: pointer; transition: 0.2s;
+    padding: 14px; border-radius: 18px; border: 1px solid var(--glass-border);
+    text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
   }
-  .opt-box.selected { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); }
   
-  .color-match { border-color: var(--ok); color: var(--ok); }
-  .color-energy { border-color: var(--warn); color: var(--warn); }
-  .color-pitchpro { border-color: var(--pitch); color: var(--pitch); }
+  .opt-box.color-match { color: var(--ok); }
+  .opt-box.color-energy { color: var(--warn); }
+  .opt-box.color-pitchpro { color: var(--pitch); }
 
-  /* Botones */
+  .opt-box.selected { 
+    border-color: currentColor; 
+    background: rgba(255, 255, 255, 0.1); 
+    transform: translateY(-4px); 
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px currentColor; 
+  }
+
+  /* Coach */
+  .coach-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 35px; padding: 24px; margin-top: 20px;
+  }
+  .coach-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .toggle-icon { font-size: 20px; transition: transform 0.3s; opacity: 0.6; }
+  .coach-panel.closed .coach-body { display: none; }
+  .coach-panel.closed .toggle-icon { transform: rotate(-90deg); }
+
+  .coach-content { 
+    background: rgba(0,0,0,0.4); border-radius: 24px; padding: 22px;
+    border-left: 5px solid var(--ok); margin-top: 20px;
+  }
+
+  .dj-list {
+    margin-top: 15px; padding: 15px; border-radius: 18px;
+    background: rgba(255,255,255,0.02); font-size: 12px; color: var(--sub); line-height: 1.6;
+    border: 1px solid var(--glass-border);
+  }
+
+  /* UI Elements */
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 10px 16px; border-radius: 14px; border: 1px solid var(--glass-border);
+    padding: 12px 20px; border-radius: 16px; border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.05); color: var(--text);
-    cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 13px;
+    cursor: pointer; transition: 0.2s; font-weight: 700; font-size: 13px;
   }
-  .btn.active { background: #fff; color: #000; border-color: #fff; }
+  .btn.active { background: #fff; color: #000; border-color: #fff; box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
 
-  /* Footer Minimalista */
-  .footer {
-    margin-top: 40px; text-align: center; border-top: 1px solid var(--glass-border);
-    padding: 40px 16px 60px;
-  }
-  .social-group { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
-  .social-btn {
-    text-decoration: none; color: #fff; background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px 20px;
-    border-radius: 16px; font-size: 12px; font-weight: 700;
-  }
-  .social-btn.patreon { border-color: #ff424d; color: #ff424d; }
+  .marker-group, .label-group { pointer-events: none; }
+  .marker-text { font-size: 10px; font-weight: 900; fill: #000; text-shadow: 0 0 2px rgba(255,255,255,0.5); }
+  .label-cam { font-weight: 900; font-size: 15px; }
+  .label-anglo { font-size: 11px; font-weight: 700; opacity: 0.8; }
 
-  .marker-text { font-size: 10px; font-weight: 900; fill: #000; pointer-events: none; }
-  .label-cam { font-weight: 800; font-size: 15px; }
-  .label-anglo { font-size: 11px; font-weight: 700; }
+  .footer { margin-top: 60px; text-align: center; border-top: 1px solid var(--glass-border); padding: 50px 16px 80px; }
 </style>
 </head>
 <body>
 
-  <div id="toast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 24px; border-radius: 16px; font-weight: 700; opacity: 0; transition: 0.3s; z-index: 1000;">Copiado</div>
+  <div id="toast" style="position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 14px 28px; border-radius: 20px; font-weight: 800; opacity: 0; transition: 0.3s; z-index: 1000; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">Copiado al Pitch</div>
 
   <div class="topbar">
     <div class="topbar-inner">
-      <div style="font-weight:900; font-size:20px; letter-spacing:-1px">
-        <span style="color:var(--ok)">MASH</span>LAB <span style="font-weight:200; opacity:0.6">v1.1</span>
+      <div class="brand-logo">
+        <span style="color:var(--ok)">MASH</span>LAB <span style="font-weight:200; opacity:0.6">STUDIO</span>
       </div>
-      <div style="display:flex; gap:6px; background:rgba(255,255,255,0.04); padding:4px; border-radius:14px">
-        <button id="modeVoz" class="btn active" style="padding:6px 12px" onclick="setMode('voz')">Voz</button>
-        <button id="modeInst" class="btn" style="padding:6px 12px" onclick="setMode('inst')">Base</button>
+      <div class="mode-controls">
+        <div style="display:flex; gap:8px; background:rgba(255,255,255,0.05); padding:5px; border-radius:18px; border:1px solid var(--glass-border)">
+          <button id="modeVoz" class="btn active" style="padding:8px 16px" onclick="setMode('voz')">Manda Voz</button>
+          <button id="modeInst" class="btn" style="padding:8px 16px" onclick="setMode('inst')">Manda Base</button>
+        </div>
+        <div id="activeModeLegend" class="mode-legend">Seguir a la Voz</div>
       </div>
     </div>
   </div>
 
   <div class="container">
     
-    <!-- GESTIÓN DE PISTAS -->
+    <div class="donation-banner">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span style="font-size: 32px;">🎧</span>
+        <div style="text-align: left;">
+          <div style="font-weight: 800; font-size: 16px; color: #fff;">Apoya a MashLab Studio</div>
+          <div style="font-size: 12px; color: var(--sub); max-width: 400px;">Herramienta gratuita e independiente para la comunidad.</div>
+        </div>
+      </div>
+      <div id="kofi-widget-container">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>
+          kofiwidget2.init('Invítame un Café', '#72a4f2', 'U7U319RGKF');
+          kofiwidget2.draw();
+        </script>
+      </div>
+    </div>
+
     <div class="panel">
       <div class="song-grid">
         <div id="colVoz">
-          <h3>Acapellas</h3>
+          <h3>Acapellas (Voces)</h3>
           <div id="listV"></div>
-          <button class="btn" style="width:100%; border-style:dashed; margin-top:10px" onclick="addSong('voz')">➕ Añadir Clip</button>
+          <button class="btn" style="width:100%; border-style:dashed; margin-top:10px; background:transparent" onclick="addSong('voz')">➕ Añadir Clip Voz</button>
         </div>
         <div id="colInst">
-          <h3>Instrumentales</h3>
+          <h3>Instrumentales (Bases)</h3>
           <div id="listI"></div>
-          <button class="btn" style="width:100%; border-style:dashed; margin-top:10px" onclick="addSong('inst')">➕ Añadir Clip</button>
+          <button class="btn" style="width:100%; border-style:dashed; margin-top:10px; background:transparent" onclick="addSong('inst')">➕ Añadir Clip Base</button>
         </div>
       </div>
     </div>
 
-    <!-- RUEDA INTERACTIVA -->
-    <div class="wheel-container">
+    <div class="wheel-wrapper">
       <div style="text-align:center; margin-bottom:20px">
-        <h2 style="margin:0">RUEDA DE CAMELOT</h2>
-        <p id="guideKeyLabel" style="color:var(--ok); font-size:16px; margin-top:8px; font-weight:800">--</p>
+        <h2 style="margin:0; text-transform:uppercase; letter-spacing:1px">Rueda de Camelot</h2>
+        <p id="guideKeyLabel" style="color:var(--ok); font-size:18px; margin-top:8px; font-weight:900">--</p>
       </div>
-      <div id="wheelTarget" style="width:100%; display:flex; justify-content:center"></div>
+      <div class="wheel-ring">
+        <div id="wheelTarget" style="width:100%; height:100%;"></div>
+      </div>
     </div>
 
-    <!-- ANÁLISIS -->
     <div style="margin-bottom:20px; padding-left:10px">
-      <h2 style="font-size:16px; color:var(--sub); margin-bottom: 20px;">Ajustes de Semitonos</h2>
+      <h2 style="font-size:17px; color:var(--sub); margin-bottom: 20px;">Ajustes de Pitch Recomendados</h2>
       <div id="analysisContainer"></div>
     </div>
 
-    <footer class="footer">
-      <p style="color: var(--sub); font-size: 13px;">Apoya el desarrollo pro de MashLab:</p>
-      <div class="social-group">
-        <a href="https://www.patreon.com/c/Ivanvazquezmx" target="_blank" class="social-btn patreon">💎 Patreon</a>
-        <a href="https://linktr.ee/ivanvazquezmusic" target="_blank" class="social-btn">🌳 Linktree</a>
-        <a href="https://www.instagram.com/ivanvazquezmx/" target="_blank" class="social-btn">📸 Instagram</a>
+    <div id="coachPanel" class="coach-panel">
+      <div class="coach-header" onclick="toggleCoach()">
+        <h2>Monitor Armónico <small style="font-weight:400; opacity:0.6; font-size:13px; margin-left:10px">(Energía y Mood)</small></h2>
+        <span class="toggle-icon">▼</span>
       </div>
-      <div style="margin-top: 40px; font-size: 10px; opacity: 0.2; letter-spacing: 4px;">MASHLAB v1.1 • STUDIO</div>
+      <div class="coach-body">
+        <div id="coachTabs" style="display:flex; gap:8px; flex-wrap:wrap; margin:20px 0;">
+          <button id="tab-Exacta" class="btn active" onclick="setGlobalRelation('Exacta')">Match</button>
+          <button id="tab-Relativa" class="btn" onclick="setGlobalRelation('Relativa')">Relativa</button>
+          <button id="tab-Subida" class="btn" onclick="setGlobalRelation('Subida')">Subida</button>
+          <button id="tab-Sutil" class="btn" onclick="setGlobalRelation('Sutil')">Sutil</button>
+          <button id="tab-Energía" class="btn" onclick="setGlobalRelation('Energía')">Energía</button>
+          <button id="tab-PitchPro" class="btn" onclick="setGlobalRelation('PitchPro')">Pitch Pro</button>
+        </div>
+        <div id="coachContent" class="coach-content"></div>
+        <div id="djExperts" class="dj-list"></div>
+        <p style="font-size: 13px; color: var(--sub); line-height: 1.6; padding: 0 10px; margin-top: 20px;">
+          Estas son opciones creativas para tus mashups. Elige con libertad sabiendo que técnicamente el mix será armónico.
+        </p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:30px">
+        <a href="https://www.patreon.com/c/Ivanvazquezmx" target="_blank" style="text-decoration:none; color:#ff424d; font-weight:800">💎 Patreon</a>
+        <a href="https://linktr.ee/ivanvazquezmusic" target="_blank" style="text-decoration:none; color:var(--ok); font-weight:800">🌳 Linktree</a>
+        <a href="https://www.instagram.com/ivanvazquezmx/" target="_blank" style="text-decoration:none; color:#fff; opacity:0.5">📸 Instagram</a>
+      </div>
+      <div style="font-size: 10px; opacity: 0.2; letter-spacing: 5px; font-weight:900">MASHLAB v1.1 • STUDIO</div>
     </footer>
   </div>
 
@@ -208,14 +300,30 @@ const PC = {
   "1B":11,"2B":6,"3B":1,"4B":8,"5B":3,"6B":10,"7B":5,"8B":0,"9B":7,"10B":2,"11B":9,"12B":4
 };
 
+const COACH_DATA = {
+  'Exacta': { vibe: "Match Perfecto", desc: "Mezcla estable y limpia. El estándar para transiciones invisibles y mashups largos.", color: "var(--ok)", djs: ["Tiesto", "Armin van Buuren", "Paul van Dyk", "Ferry Corsten", "John Digweed", "Hernan Cattaneo", "Sasha", "Above & Beyond", "Aly & Fila", "Markus Schulz"] },
+  'Relativa': { vibe: "Cambio de Sentimiento", desc: "Mismas notas, diferente intención. De eufórico a reflexivo sin desafinar.", color: "var(--ok)", djs: ["Kaskade", "Deadmau5", "Eric Prydz", "ZHU", "Rufus Du Sol", "Lane 8", "Nora En Pure", "Gorgon City", "CamelPhat", "Ben Böhmer"] },
+  'Subida': { vibe: "Energía en Ascenso (+1h)", desc: "Empuja el mix hacia adelante. Ideal para subir la intensidad del set de forma natural.", color: "var(--ok)", djs: ["David Guetta", "Calvin Harris", "Alesso", "Sebastian Ingrosso", "Steve Angello", "Martin Garrix", "Afrojack", "Dimitri Vegas", "Like Mike", "Nicky Romero"] },
+  'Sutil': { vibe: "Mood Relajado (-1h)", desc: "Baja la intensidad con clase. Perfecto para sets progresivos y momentos más profundos.", color: "var(--ok)", djs: ["Solomun", "Black Coffee", "Boris Brejcha", "Carl Cox", "Jamie Jones", "Marco Carola", "The Martinez Brothers", "Ricardo Villalobos", "Sven Väth", "Adam Beyer"] },
+  'Energía': { vibe: "Salto de Energía (+2h)", desc: "Inyección de adrenalina pura. Prepara al público para un drop explosivo.", color: "var(--warn)", djs: ["Skrillex", "Hardwell", "W&W", "Blasterjaxx", "Timmy Trumpet", "Steve Aoki", "Marshmello", "The Chainsmokers", "R3HAB", "Don Diablo"] },
+  'PitchPro': { vibe: "Ajuste Inteligente (+/- 1st)", desc: "El secreto de los maestros. Tonalidades ricas que encajan perfectamente a solo un semitono.", color: "var(--pitch)", djs: ["Zedd", "James Hype", "Laidback Luke", "A-Trak", "Diplo", "Fred again..", "Four Tet", "Fisher", "Chris Lake", "Mochakk"] }
+};
+
 let state = JSON.parse(localStorage.getItem('mashlab_state')) || {
   mode: 'voz',
   selectedRel: 'Exacta',
-  voices: [{id:1, title:'Clip Voz 1', key:'4B'}],
-  insts: [{id:101, title:'Clip Base 1', key:'6A'}],
+  coachOpen: true,
+  voices: [{id:1, title:'Acapella principal', key:'4B'}],
+  insts: [{id:101, title:'Beat instrumental', key:'6A'}],
 };
 
 function save() { localStorage.setItem('mashlab_state', JSON.stringify(state)); }
+
+function toggleCoach() {
+  state.coachOpen = !state.coachOpen;
+  document.getElementById('coachPanel').classList.toggle('closed', !state.coachOpen);
+  save();
+}
 
 function getShift(from, to) {
   let diff = (PC[to] - PC[from] + 12) % 12;
@@ -241,10 +349,29 @@ function getTargetKey(guideKey, type) {
   return guideKey;
 }
 
+function updateCoachUI(type) {
+  const container = document.getElementById('coachContent');
+  const djsContainer = document.getElementById('djExperts');
+  if (!container || !djsContainer) return;
+  const info = COACH_DATA[type];
+  document.querySelectorAll('#coachTabs .btn').forEach(b => b.classList.toggle('active', b.id === `tab-${type}`));
+  container.style.borderLeftColor = info.color;
+  container.innerHTML = `<div style="font-weight:900; font-size:16px; margin-bottom:10px; color:${info.color}">${info.vibe}</div><div style="font-size:14px; line-height:1.6;">${info.desc}</div>`;
+  djsContainer.innerHTML = `<strong>Esta técnica la ocupan mucho estos DJs:</strong><br>${info.djs.join(", ")}.`;
+}
+
+function setGlobalRelation(type) {
+  state.selectedRel = type;
+  updateCoachUI(type);
+  render();
+}
+
 function render() {
   const list = state.mode === 'voz' ? state.voices : state.insts;
   const guideKey = list.length ? list[0].key : "1A";
   document.getElementById('guideKeyLabel').textContent = `${guideKey} (${DATA[guideKey]})`;
+  document.getElementById('activeModeLegend').textContent = state.mode === 'voz' ? 'Seguir a la Voz' : 'Seguir a la Base';
+  
   renderList('voz', state.voices);
   renderList('inst', state.insts);
   renderAnalysis(guideKey);
@@ -255,16 +382,16 @@ function render() {
 function renderList(type, songs) {
   const container = document.getElementById(type === 'voz' ? 'listV' : 'listI');
   container.innerHTML = '';
-  songs.forEach((s, i) => {
-    const isG = state.mode === type && i === 0;
+  songs.forEach((s, idx) => {
+    const isG = state.mode === type && idx === 0;
     const div = document.createElement('div');
     div.className = `song-item ${isG ? 'is-guide' : ''}`;
     div.innerHTML = `
       <input type="text" class="input" value="${s.title}" onchange="updateSong('${type}',${s.id},'title',this.value)">
       <select class="select" onchange="updateSong('${type}',${s.id},'key',this.value)">
-        ${Object.keys(DATA).map(k => `<option value="${k}" ${k===s.key?'selected':''}>${k}</option>`).join('')}
+        ${Object.keys(DATA).map(k => `<option value="${k}" ${k===s.key?'selected':''}>${k} (${DATA[k]})</option>`).join('')}
       </select>
-      <button onclick="deleteSong('${type}',${s.id})" style="background:none; border:none; color:var(--down); font-weight:800;">✕</button>
+      <button onclick="deleteSong('${type}',${s.id})" style="background:none; border:none; color:var(--down); font-weight:800; cursor:pointer">✕</button>
     `;
     container.appendChild(div);
   });
@@ -276,26 +403,29 @@ function renderAnalysis(guideKey) {
   if (!targets.length) { container.innerHTML = ""; return; }
   container.innerHTML = targets.map(song => {
     const tk = getTargetKey(guideKey, state.selectedRel);
-    const s = getShift(song.key, tk);
-    const st = s === 0 ? '0' : (s > 0 ? '+'+s : s);
+    const sh = getShift(song.key, tk);
+    const isSel = state.selectedRel;
+    const cat = ['Exacta','Relativa','Subida','Sutil'].includes(isSel) ? 'match' : (isSel==='Energía'?'energy':'pitchpro');
+    
     return `<div class="analysis-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
-          <div><div style="font-weight:800; font-size:16px">${song.title}</div><div style="font-size:12px; color:var(--sub)">Original: ${song.key}</div></div>
+          <div><div style="font-weight:800; font-size:18px">${song.title}</div><div style="font-size:12px; color:var(--sub)">Original: ${song.key}</div></div>
           <div style="text-align:right">
-            <div style="font-size:20px; font-weight:900; color:${s===0?'var(--ok)':(s>0?'var(--warn)':'var(--down)')}">${st} st</div>
-            <button class="btn" style="padding:4px 10px; font-size:10px; margin-top:5px" onclick="copyToClipboard('${st}')">COPIAR</button>
+             <div style="font-size:10px; color:var(--sub); margin-bottom:4px">KEY SHIFT</div>
+             <div style="font-size:20px; font-weight:900; color:${sh === 0 ? 'var(--ok)' : (sh > 0 ? 'var(--warn)' : 'var(--down)')}">${sh === 0 ? '0' : (sh > 0 ? '+'+sh : sh)} st</div>
           </div>
         </div>
         <div class="options-grid">
           ${['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].map(type => {
             const k = getTargetKey(guideKey, type);
-            const sh = getShift(song.key, k);
-            const isSel = state.selectedRel === type;
-            const cat = ['Exacta','Relativa','Subida','Sutil'].includes(type) ? 'match' : (type==='Energía'?'energy':'pitchpro');
-            return `<div class="opt-box ${isSel ? 'selected' : ''} color-${cat}" onclick="setGlobalRelation('${type}')">
-              <div style="font-size:9px; font-weight:800; opacity:0.6">${type.toUpperCase()}</div>
-              <div style="font-weight:800; font-size:13px">${k}</div>
-              <div style="font-size:14px; font-weight:900">${sh === 0 ? '0' : (sh > 0 ? '+' + sh : sh)}</div>
+            const sVal = getShift(song.key, k);
+            const isSelected = state.selectedRel === type;
+            const tCat = ['Exacta','Relativa','Subida','Sutil'].includes(type) ? 'match' : (type==='Energía'?'energy':'pitchpro');
+            
+            return `<div class="opt-box ${isSelected ? 'selected' : ''} color-${tCat}" onclick="setGlobalRelation('${type}')">
+              <div style="font-size:9px; font-weight:900; opacity:0.6; text-transform:uppercase">${type}</div>
+              <div style="font-weight:900; font-size:14px">${k}</div>
+              <div style="font-size:12px; font-weight:800; opacity:0.8">${sVal === 0 ? '0' : (sVal > 0 ? '+' + sVal : sVal)} st</div>
             </div>`;
           }).join('')}
         </div>
@@ -305,7 +435,7 @@ function renderAnalysis(guideKey) {
 
 function drawWheel(guideKey) {
   const target = document.getElementById('wheelTarget');
-  const size = 500, cx = 250, cy = 250, rO = 235, rM = 155, rIn = 80;
+  const size = 500, cx = 250, cy = 250, rO = 235, rM = 155, rIn = 85;
   let html = `<svg viewBox="0 0 ${size} ${size}" class="camelot-wheel">`;
   for(let i=0; i<12; i++) {
     const s = (i * 30) - 15, e = ((i + 1) * 30) - 15;
@@ -316,34 +446,59 @@ function drawWheel(guideKey) {
 }
 
 function drawSeg(cx, cy, rin, rout, s, e, key, guide) {
-  const rad = Math.PI / 180, x1 = cx + rout * Math.cos(s * rad), y1 = cy + rout * Math.sin(s * rad), x2 = cx + rout * Math.cos(e * rad), y2 = cy + rout * Math.sin(e * rad), x3 = cx + rin * Math.cos(e * rad), y3 = cy + rin * Math.sin(e * rad), x4 = cx + rin * Math.cos(s * rad), y4 = cy + rin * Math.sin(s * rad);
-  const isA = key === guide, tk = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].map(t => getTargetKey(guide, t));
-  const isTarget = tk.includes(key);
+  const rad = Math.PI / 180;
+  const x1 = cx + rout * Math.cos(s * rad), y1 = cy + rout * Math.sin(s * rad);
+  const x2 = cx + rout * Math.cos(e * rad), y2 = cy + rout * Math.sin(e * rad);
+  const x3 = cx + rin * Math.cos(e * rad), y3 = cy + rin * Math.sin(e * rad);
+  const x4 = cx + rin * Math.cos(s * rad), y4 = cy + rin * Math.sin(s * rad);
+  
+  const isA = key === guide;
+  const currentTarget = getTargetKey(guide, state.selectedRel);
+  const isGhost = key === currentTarget && !isA;
+  const tk = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].map(t => getTargetKey(guide, t));
+  const isCompatible = tk.includes(key);
+  
   let fill = "rgba(255,255,255,0.02)";
-  if (isA) fill = "#fff"; 
-  else if (isTarget) {
+  if (isA) fill = "#fff";
+  else if (isGhost) {
+    const type = state.selectedRel;
+    if(['Exacta','Relativa','Subida','Sutil'].includes(type)) fill = "var(--ok)";
+    else if(type==='Energía') fill = "var(--warn)";
+    else fill = "var(--pitch)";
+  } 
+  else if (isCompatible) {
     const type = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].find(t => getTargetKey(guide, t) === key);
-    if(['Exacta','Relativa','Subida','Sutil'].includes(type)) fill = "rgba(0, 255, 136, 0.4)";
-    else if(type==='Energía') fill = "rgba(255, 204, 0, 0.5)";
-    else fill = "rgba(0, 229, 255, 0.5)";
+    if(['Exacta','Relativa','Subida','Sutil'].includes(type)) fill = "rgba(0, 255, 136, 0.2)";
+    else if(type==='Energía') fill = "rgba(255, 204, 0, 0.2)";
+    else fill = "rgba(0, 229, 255, 0.2)";
   }
+
   const mid = (s + e) / 2, tx = cx + ((rin + rout) / 2) * Math.cos(mid * rad), ty = cy + ((rin + rout) / 2) * Math.sin(mid * rad);
   const vP = state.voices.find(v => v.key === key), bP = state.insts.find(i => i.key === key);
-  let m = ""; if(vP) m += `<circle cx="${tx-12}" cy="${ty-15}" r="9" fill="var(--ok)"/><text x="${tx-12}" y="${ty-12}" text-anchor="middle" class="marker-text">V</text>`;
-  if(bP) m += `<circle cx="${tx+12}" cy="${ty-15}" r="9" fill="var(--blue)"/><text x="${tx+12}" y="${ty-12}" text-anchor="middle" class="marker-text">B</text>`;
-  return `<path d="M ${x1} ${y1} A ${rout} ${rout} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rin} ${rin} 0 0 0 ${x4} ${y4} Z" fill="${fill}" class="segment ${isA?'active':''}" onclick="setKeyFromWheel('${key}')" />
-    <g transform="rotate(${mid+90}, ${tx}, ${ty})"><text x="${tx}" y="${ty+3}" text-anchor="middle" class="label-cam" style="fill:${isA?'#000':'#fff'}">${key}</text><text x="${tx}" y="${ty+16}" text-anchor="middle" class="label-anglo" style="fill:${isA?'#333':'rgba(255,255,255,0.6)'}">${DATA[key]}</text></g>${m}`;
+  
+  let m = ""; 
+  if(vP) m += `<circle cx="${tx-14}" cy="${ty-16}" r="10" fill="var(--ok)"/><text x="${tx-14}" y="${ty-12.5}" text-anchor="middle" class="marker-text">V</text>`;
+  if(bP) m += `<circle cx="${tx+14}" cy="${ty-16}" r="10" fill="var(--blue)"/><text x="${tx+14}" y="${ty-12.5}" text-anchor="middle" class="marker-text">B</text>`;
+  
+  return `<g class="segment-group" onclick="setKeyFromWheel('${key}')">
+    <path d="M ${x1} ${y1} A ${rout} ${rout} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rin} ${rin} 0 0 0 ${x4} ${y4} Z" fill="${fill}" class="segment ${isGhost?'ghost':''} ${isA?'active':''}" />
+    <g class="label-group"><text x="${tx}" y="${ty+4}" text-anchor="middle" class="label-cam" style="fill:${isA?'#000':'#fff'}">${key}</text><text x="${tx}" y="${ty+18}" text-anchor="middle" class="label-anglo" style="fill:${isA?'#333':'rgba(255,255,255,0.6)'}">${DATA[key]}</text></g>
+    <g class="marker-group">${m}</g>
+  </g>`;
 }
 
 function setKeyFromWheel(key) { const list = state.mode==='voz'?state.voices:state.insts; if(list.length) updateSong(state.mode, list[0].id, 'key', key); }
-function setMode(m) { state.mode = m; document.getElementById('modeVoz').classList.toggle('active', m === 'voz'); document.getElementById('modeInst').classList.toggle('active', m === 'inst'); render(); }
-function setGlobalRelation(type) { state.selectedRel = type; render(); }
-function addSong(t) { const id = Date.now(), s = { id, title: `Pista ${t==='voz'?'Voz':'Base'}`, key: '8A' }; if(t==='voz') state.voices.push(s); else state.insts.push(s); render(); }
+function setMode(m) { state.mode = m; document.getElementById('modeVoz').classList.add('active'); document.getElementById('modeInst').classList.remove('active'); if(m==='inst'){ document.getElementById('modeInst').classList.add('active'); document.getElementById('modeVoz').classList.remove('active'); } render(); }
+function addSong(t) { const id = Date.now(), s = { id, title: `Pista ${t==='voz'?'Voz':'Inst'}`, key: '8A' }; if(t==='voz') state.voices.push(s); else state.insts.push(s); render(); }
 function deleteSong(t, id) { const arr = t==='voz' ? state.voices : state.insts; if(arr.length > 1) { if(t==='voz') state.voices = state.voices.filter(x=>x.id!==id); else state.insts = state.insts.filter(x=>x.id!==id); render(); } }
 function updateSong(t, id, f, v) { const arr = t==='voz' ? state.voices : state.insts; const s = arr.find(x=>x.id===id); if(s) { s[f] = v; render(); } }
 function copyToClipboard(t) { const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); const toast = document.getElementById('toast'); toast.style.opacity = '1'; setTimeout(() => toast.style.opacity = '0', 2000); }
 
-window.onload = render;
+window.onload = () => {
+  render();
+  updateCoachUI(state.selectedRel);
+  document.getElementById('coachPanel').classList.toggle('closed', !state.coachOpen);
+};
 </script>
 </body>
 </html>
