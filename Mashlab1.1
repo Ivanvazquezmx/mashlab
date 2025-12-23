@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MashLab v1.1 - Pro Studio Tool</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231f1f1f' width='100' height='100' rx='20'/><path d='M35 75V25l35-5v45M25 75a10 10 0 1 0 20 0 10 10 0 1 0-20 0M55 65a10 10 0 1 0 20 0 10 10 0 1 0-20 0' fill='none' stroke='%2300ff88' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+  :root {
+    --bg-gradient: linear-gradient(135deg, #050508 0%, #0a0a15 50%, #050508 100%);
+    --glass: rgba(10, 10, 20, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff;
+    --sub: #94a3b8;
+    --ok: #00ff88;    /* Verde Neon */
+    --warn: #ffcc00;  /* Amarillo Eléctrico */
+    --pitch: #00e5ff; /* Cian Brillante */
+    --blue: #3b82f6;
+    --down: #ff3366;
+    --accent: #ffffff;
+    --linktree: #43e55e;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+  
+  body {
+    margin: 0; min-height: 100vh;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    overflow-x: hidden;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 20px 20px 80px; }
+
+  /* 1. Banner de Donación */
+  .donation-banner {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px; padding: 24px; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    backdrop-filter: blur(15px);
+  }
+  @media(max-width: 650px) { .donation-banner { flex-direction: column; text-align: center; } }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(5, 5, 10, 0.8);
+    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .topbar-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; max-width: 1000px; margin: 0 auto; padding: 0 20px;
+  }
+
+  /* 2. Paneles de Clips */
+  .panel {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 32px; padding: 32px; margin-bottom: 32px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  }
+
+  h2 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.5px; opacity: 0.9; }
+  h3 { margin: 0 0 16px 0; font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: 2px; font-weight: 800; }
+
+  .song-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media(max-width:750px){ .song-grid { grid-template-columns: 1fr; gap: 30px; } }
+
+  .song-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 14px;
+    display: grid; grid-template-columns: 1fr 120px 35px; gap: 12px;
+    align-items: center; margin-bottom: 12px;
+  }
+  .song-item.is-guide { border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.1); }
+
+  .input, .select {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--glass-border);
+    color: #fff; padding: 10px; border-radius: 14px;
+    font-size: 13px;
+  }
+
+  /* 3. Rueda de Camelot Interactiva */
+  .wheel-container {
+    display: flex; flex-direction: column; align-items: center;
+    background: rgba(0,0,0,0.5); border-radius: 48px; padding: 40px;
+    border: 1px solid var(--glass-border); margin-bottom: 32px;
+  }
+  svg.camelot-wheel { width: 100%; max-width: 520px; height: auto; transform: rotate(-15deg); }
+  
+  .segment { cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+  .segment:hover { filter: brightness(1.5); }
+  .segment.active { stroke: #fff; stroke-width: 3px; }
+
+  /* 4. Análisis Armónico */
+  .analysis-card {
+    background: var(--glass);
+    border-radius: 32px; padding: 28px; margin-bottom: 24px;
+    border: 1px solid var(--glass-border);
+  }
+  .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 12px; margin-top: 15px; }
+  
+  .opt-box {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 14px; border-radius: 20px; border: 1px solid var(--glass-border);
+    text-align: center; cursor: pointer; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .opt-box.selected { border-color: var(--accent); background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
+  
+  .color-match { border-color: var(--ok); color: var(--ok); background: rgba(0, 255, 136, 0.05); }
+  .color-energy { border-color: var(--warn); color: var(--warn); background: rgba(255, 204, 0, 0.05); }
+  .color-pitchpro { border-color: var(--pitch); color: var(--pitch); background: rgba(0, 229, 255, 0.05); }
+
+  /* 5. Monitor Armónico (Replegable) */
+  .coach-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 32px; padding: 24px; margin-top: 40px;
+    overflow: hidden;
+  }
+  .coach-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .toggle-icon { font-size: 20px; transition: transform 0.3s; opacity: 0.5; }
+  .coach-panel.closed .coach-body { display: none; }
+  .coach-panel.closed .toggle-icon { transform: rotate(-90deg); }
+
+  .coach-content { 
+    background: rgba(0,0,0,0.3); border-radius: 24px; padding: 24px;
+    border-left: 4px solid var(--ok); min-height: 80px; margin-top: 20px;
+  }
+
+  /* Botones y Footer */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 18px; border-radius: 14px; border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.05); color: var(--text);
+    cursor: pointer; transition: 0.2s; font-weight: 600; font-size: 13px;
+  }
+  .btn.active { background: #fff; color: #000; border-color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+
+  .footer {
+    margin-top: 80px; text-align: center; border-top: 1px solid var(--glass-border);
+    padding: 60px 20px 80px; backdrop-filter: blur(10px);
+  }
+
+  .social-group { display: flex; justify-content: center; gap: 16px; margin: 30px 0; flex-wrap: wrap; }
+  .social-btn {
+    text-decoration: none; color: #fff; background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 24px;
+    border-radius: 18px; font-size: 13px; font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .social-btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+
+  .social-btn.patreon { border-color: #ff424d; color: #ff424d; }
+  .social-btn.linktree { border-color: var(--linktree); color: var(--linktree); }
+
+  .marker-text { font-size: 11px; font-weight: 900; fill: #000; pointer-events: none; text-shadow: 0 0 2px rgba(255,255,255,0.5); }
+  .label-cam { font-weight: 800; font-size: 15px; pointer-events: none; }
+  .label-anglo { font-size: 11px; font-weight: 700; pointer-events: none; }
+</style>
+</head>
+<body>
+
+  <div id="toast" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 24px; border-radius: 16px; font-weight: 700; opacity: 0; transition: 0.3s; z-index: 1000;">Copiado</div>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div style="font-weight:900; font-size:22px; letter-spacing:-1.2px; display:flex; align-items:center; gap:10px">
+        <div style="width:32px; height:32px; background:var(--ok); border-radius:10px; display:flex; align-items:center; justify-content:center; color:#000; font-size:18px">M</div>
+        <span>MASH<span style="font-weight:200; opacity:0.6">LAB</span></span>
+      </div>
+      <div style="display:flex; gap:8px; background:rgba(255,255,255,0.04); padding:4px; border-radius:18px; border:1px solid var(--glass-border)">
+        <button id="modeVoz" class="btn active" onclick="setMode('voz')">Voz</button>
+        <button id="modeInst" class="btn" onclick="setMode('inst')">Base</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <!-- 1. BANNER DE APOYO -->
+    <div class="donation-banner">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span style="font-size: 32px;">🎧</span>
+        <div style="text-align: left;">
+          <div style="font-weight: 800; font-size: 16px; color: #fff;">MashLab es Gratis para la Comunidad</div>
+          <div style="font-size: 13px; color: var(--sub); max-width: 400px;">Si esta herramienta te ayuda a crear mejores mezclas, apóyame para seguir mejorándola.</div>
+        </div>
+      </div>
+      <div id="kofi-widget-container">
+        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+        <script type='text/javascript'>
+          kofiwidget2.init('Apoyar en Ko-fi', '#72a4f2', 'U7U319RGKF');
+          kofiwidget2.draw();
+        </script>
+      </div>
+    </div>
+
+    <!-- 2. GESTIÓN DE PISTAS -->
+    <div class="panel">
+      <div class="song-grid">
+        <div id="colVoz">
+          <h3>Acapellas (Voces)</h3>
+          <div id="listV"></div>
+          <button class="btn" style="width:100%; border-style:dashed; opacity:0.4; margin-top:15px; background:transparent" onclick="addSong('voz')">➕ Añadir Clip</button>
+        </div>
+        <div id="colInst">
+          <h3>Instrumentales (Bases)</h3>
+          <div id="listI"></div>
+          <button class="btn" style="width:100%; border-style:dashed; opacity:0.4; margin-top:15px; background:transparent" onclick="addSong('inst')">➕ Añadir Clip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. RUEDA DE CAMELOT -->
+    <div class="wheel-container">
+      <div style="text-align:center; margin-bottom:30px">
+        <h2 style="margin:0; letter-spacing: 1px;">RUEDA DE CAMELOT</h2>
+        <p style="color:var(--sub); font-size:14px; margin-top:5px">Haz clic en la rueda para cambiar el tono de la <b id="currentModeLabel" style="color:#fff">Voz</b></p>
+        <p id="guideKeyLabel" style="color:var(--ok); font-size:18px; margin-top:8px; font-weight:800">--</p>
+      </div>
+      <div id="wheelTarget" style="width:100%; display:flex; justify-content:center"></div>
+    </div>
+
+    <!-- 4. ANÁLISIS ARMÓNICO -->
+    <div style="margin-bottom:40px; padding-left:10px">
+      <h2 style="font-size:16px; color:var(--sub); margin-bottom: 20px;">Análisis de Ajustes</h2>
+      <div id="analysisContainer"></div>
+    </div>
+
+    <!-- 5. MONITOR ARMÓNICO -->
+    <div id="coachPanel" class="coach-panel closed">
+      <div class="coach-header" onclick="toggleCoach()">
+        <h2>Monitor Armónico <small style="font-weight:400; opacity:0.7; font-size:13px; margin-left:10px">(Guía de energía y mood)</small></h2>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="coach-body">
+        <div id="coachTabs" class="coach-tabs" style="display:flex; gap:8px; flex-wrap:wrap; margin:20px 0;">
+          <button id="tab-Exacta" class="btn active" onclick="setGlobalRelation('Exacta')">Match</button>
+          <button id="tab-Relativa" class="btn" onclick="setGlobalRelation('Relativa')">Relativa</button>
+          <button id="tab-Subida" class="btn" onclick="setGlobalRelation('Subida')">Subida</button>
+          <button id="tab-Sutil" class="btn" onclick="setGlobalRelation('Sutil')">Sutil</button>
+          <button id="tab-Energía" class="btn" onclick="setGlobalRelation('Energía')">Energía</button>
+          <button id="tab-PitchPro" class="btn" onclick="setGlobalRelation('PitchPro')">Pitch Pro</button>
+        </div>
+        <div id="coachContent" class="coach-content"></div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div style="max-width: 600px; margin: 0 auto; line-height: 1.8; color: var(--sub); font-size: 14px;">
+        <p>Bro, si MashLab te ayuda en tu flujo, considera apoyar el desarrollo en Patreon.</p>
+      </div>
+      
+      <div class="social-group">
+        <a href="https://www.patreon.com/c/Ivanvazquezmx" target="_blank" class="social-btn patreon">
+          <span>💎 Apoyar en Patreon</span>
+        </a>
+        <a href="https://linktr.ee/ivanvazquezmusic" target="_blank" class="social-btn linktree">
+          <span>🌳 Música y Mashups</span>
+        </a>
+        <a href="https://www.instagram.com/ivanvazquezmx/" target="_blank" class="social-btn">
+          <span>📸 Instagram</span>
+        </a>
+      </div>
+      
+      <div style="margin-top: 40px; font-size: 10px; opacity: 0.2; letter-spacing: 4px; font-weight: 900;">MASHLAB v1.1 • STUDIO EDITION</div>
+    </footer>
+  </div>
+
+<script>
+const DATA = {
+  "1A":"G#m","2A":"Ebm","3A":"Bbm","4A":"Fm","5A":"Cm","6A":"Gm","7A":"Dm","8A":"Am","9A":"Em","10A":"Bm","11A":"F#m","12A":"Dbm",
+  "1B":"B","2B":"F#","3B":"Db","4B":"Ab","5B":"Eb","6B":"Bb","7B":"F","8B":"C","9B":"G","10B":"D","11B":"A","12B":"E"
+};
+const PC = {
+  "1A":8,"2A":3,"3A":10,"4A":5,"5A":0,"6A":7,"7A":2,"8A":9,"9A":4,"10A":11,"11A":6,"12A":1,
+  "1B":11,"2B":6,"3B":1,"4B":8,"5B":3,"6B":10,"7B":5,"8B":0,"9B":7,"10B":2,"11B":9,"12B":4
+};
+
+const COACH_DATA = {
+  'Exacta': { vibe: "Match Perfecto", desc: "Misma nota exacta. La mezcla más limpia y estable posible.", color: "var(--ok)" },
+  'Relativa': { vibe: "Cambio de Mood", desc: "Mismas notas pero cambia el sentimiento de Mayor a Menor. Ideal para vocales épicas.", color: "var(--ok)" },
+  'Subida': { vibe: "Energía en Ascenso", desc: "Sube un grado la energía. Perfecto para transiciones que necesitan 'crecer' naturalmente.", color: "var(--ok)" },
+  'Sutil': { vibe: "Bajada de Tensión", desc: "Baja un grado la energía. Ideal para momentos profundos o grooves relajados.", color: "var(--ok)" },
+  'Energía': { vibe: "Inyección de Power", desc: "Salto de 2 grados. Genera un choque de energía fuerte, ideal para preparar el drop.", color: "var(--warn)" },
+  'PitchPro': { vibe: "Ajuste Inteligente (+/- 1st)", desc: "El secreto pro: tonalidades que parecen lejos pero a solo un semitono encajan perfecto.", color: "var(--pitch)" }
+};
+
+let state = JSON.parse(localStorage.getItem('mashlab_state')) || {
+  mode: 'voz',
+  selectedRel: 'Exacta',
+  coachOpen: false,
+  voices: [{id:1, title:'Vocal Principal', key:'4B'}],
+  insts: [{id:101, title:'Beat Base', key:'6A'}],
+};
+
+function save() { localStorage.setItem('mashlab_state', JSON.stringify(state)); }
+
+function toggleCoach() {
+  state.coachOpen = !state.coachOpen;
+  document.getElementById('coachPanel').classList.toggle('closed', !state.coachOpen);
+  save();
+}
+
+function getShift(from, to) {
+  let diff = (PC[to] - PC[from] + 12) % 12;
+  return diff > 6 ? diff - 12 : diff;
+}
+
+function getTargetKey(guideKey, type) {
+  const n = parseInt(guideKey), m = guideKey.slice(-1);
+  if (type === 'Exacta') return guideKey;
+  if (type === 'Relativa') return `${n}${m === 'A' ? 'B' : 'A'}`;
+  if (type === 'Subida') return `${n === 12 ? 1 : n + 1}${m}`;
+  if (type === 'Sutil') return `${n === 1 ? 12 : n - 1}${m}`;
+  if (type === 'Energía') return `${n + 2 > 12 ? (n + 2) - 12 : n + 2}${m}`;
+  if (type === 'PitchPro') {
+    let p = null, mi = null;
+    for (let k of Object.keys(DATA)) {
+      if (k === guideKey || k.slice(-1) !== m) continue; 
+      const s = getShift(guideKey, k);
+      if (s === 1) p = k; if (s === -1) mi = k;
+    }
+    return p || mi || guideKey;
+  }
+  return guideKey;
+}
+
+function updateCoachUI(type) {
+  const container = document.getElementById('coachContent');
+  if (!container) return;
+  const info = COACH_DATA[type];
+  document.querySelectorAll('#coachTabs .btn').forEach(b => b.classList.toggle('active', b.id === `tab-${type}`));
+  container.style.borderLeftColor = info.color;
+  container.innerHTML = `<div style="font-weight:800; font-size:16px; margin-bottom:8px; color:${info.color}">${info.vibe}</div><div style="font-size:14px; line-height:1.5;">${info.desc}</div>`;
+}
+
+function setGlobalRelation(type) {
+  state.selectedRel = type;
+  updateCoachUI(type);
+  render();
+}
+
+function render() {
+  const list = state.mode === 'voz' ? state.voices : state.insts;
+  const guideKey = list.length ? list[0].key : "1A";
+  
+  document.getElementById('guideKeyLabel').textContent = `${guideKey} (${DATA[guideKey]})`;
+  document.getElementById('currentModeLabel').textContent = state.mode === 'voz' ? 'Voz' : 'Base';
+  
+  renderList('voz', state.voices);
+  renderList('inst', state.insts);
+  renderAnalysis(guideKey);
+  drawWheel(guideKey);
+  save();
+}
+
+function renderList(type, songs) {
+  const container = document.getElementById(type === 'voz' ? 'listV' : 'listI');
+  container.innerHTML = '';
+  songs.forEach((s, i) => {
+    const isG = state.mode === type && i === 0;
+    const div = document.createElement('div');
+    div.className = `song-item ${isG ? 'is-guide' : ''}`;
+    div.innerHTML = `
+      <input type="text" class="input" value="${s.title}" onchange="updateSong('${type}',${s.id},'title',this.value)">
+      <select class="select" onchange="updateSong('${type}',${s.id},'key',this.value)">
+        ${Object.keys(DATA).map(k => `<option value="${k}" ${k===s.key?'selected':''}>${k} (${DATA[k]})</option>`).join('')}
+      </select>
+      <button class="btn" style="border:none; color:var(--down)" onclick="deleteSong('${type}',${s.id})">✕</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function renderAnalysis(guideKey) {
+  const container = document.getElementById('analysisContainer');
+  const targets = state.mode === 'voz' ? state.insts : state.voices;
+  if (!targets.length) { container.innerHTML = ""; return; }
+  container.innerHTML = targets.map(song => {
+    const tk = getTargetKey(guideKey, state.selectedRel);
+    const s = getShift(song.key, tk);
+    const st = s === 0 ? '0' : (s > 0 ? '+'+s : s);
+    return `<div class="analysis-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+          <div><div style="font-weight:800; font-size:18px">${song.title}</div><div style="font-size:12px; color:var(--sub)">Original: ${song.key} (${DATA[song.key]})</div></div>
+          <div style="text-align:right">
+            <div style="font-size:26px; font-weight:900; color:${s===0?'var(--ok)':(s>0?'var(--warn)':'var(--down)')}">${st} <span style="font-size:12px; opacity:0.5">st</span></div>
+            <button class="btn" style="padding:4px 10px; font-size:10px; margin-top:5px" onclick="copyToClipboard('${st}')">COPIAR</button>
+          </div>
+        </div>
+        <div class="options-grid">
+          ${['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].map(type => {
+            const k = getTargetKey(guideKey, type);
+            const sh = getShift(song.key, k);
+            const cat = ['Exacta','Relativa','Subida','Sutil'].includes(type) ? 'match' : (type==='Energía'?'energy':'pitchpro');
+            return `<div class="opt-box ${state.selectedRel === type ? 'selected' : ''} color-${cat}" onclick="setGlobalRelation('${type}')">
+              <div style="font-size:9px; font-weight:800; opacity:0.7; margin-bottom:4px">${type.toUpperCase()}</div>
+              <div style="font-weight:800; font-size:14px">${k}</div>
+              <div style="font-size:15px; font-weight:900">${sh === 0 ? '0' : (sh > 0 ? '+' + sh : sh)} st</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function drawWheel(guideKey) {
+  const target = document.getElementById('wheelTarget');
+  const size = 500, cx = 250, cy = 250, rO = 235, rM = 155, rIn = 80;
+  let html = `<svg viewBox="0 0 ${size} ${size}" class="camelot-wheel">`;
+  for(let i=0; i<12; i++) {
+    const s = (i * 30) - 15, e = ((i + 1) * 30) - 15;
+    html += drawSeg(cx, cy, rM, rO, s, e, `${i+1}B`, guideKey);
+    html += drawSeg(cx, cy, rIn, rM, s, e, `${i+1}A`, guideKey);
+  }
+  target.innerHTML = html + `</svg>`;
+}
+
+function drawSeg(cx, cy, rin, rout, s, e, key, guide) {
+  const rad = Math.PI / 180, x1 = cx + rout * Math.cos(s * rad), y1 = cy + rout * Math.sin(s * rad), x2 = cx + rout * Math.cos(e * rad), y2 = cy + rout * Math.sin(e * rad), x3 = cx + rin * Math.cos(e * rad), y3 = cy + rin * Math.sin(e * rad), x4 = cx + rin * Math.cos(s * rad), y4 = cy + rin * Math.sin(s * rad);
+  const isA = key === guide, tk = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].map(t => getTargetKey(guide, t));
+  const isTarget = tk.includes(key);
+  
+  let fill = "rgba(255,255,255,0.02)";
+  if (isA) fill = "#fff"; 
+  else if (isTarget) {
+    const type = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].find(t => getTargetKey(guide, t) === key);
+    if(['Exacta','Relativa','Subida','Sutil'].includes(type)) fill = "rgba(0, 255, 136, 0.4)";
+    else if(type==='Energía') fill = "rgba(255, 204, 0, 0.5)";
+    else fill = "rgba(0, 229, 255, 0.5)";
+  }
+
+  const mid = (s + e) / 2, tx = cx + ((rin + rout) / 2) * Math.cos(mid * rad), ty = cy + ((rin + rout) / 2) * Math.sin(mid * rad);
+  const vP = state.voices.length ? state.voices[0].key : null, bP = state.insts.length ? state.insts[0].key : null;
+  let m = ""; 
+  if(vP && key === vP) m += `<circle cx="${tx-12}" cy="${ty-15}" r="9" fill="var(--ok)"/><text x="${tx-12}" y="${ty-12}" text-anchor="middle" class="marker-text">V</text>`;
+  if(bP && key === bP) m += `<circle cx="${tx+12}" cy="${ty-15}" r="9" fill="var(--blue)"/><text x="${tx+12}" y="${ty-12}" text-anchor="middle" class="marker-text">B</text>`;
+  
+  return `<path d="M ${x1} ${y1} A ${rout} ${rout} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rin} ${rin} 0 0 0 ${x4} ${y4} Z" fill="${fill}" class="segment ${isA?'active':''}" onclick="setKeyFromWheel('${key}')" />
+    <g transform="rotate(${mid+90}, ${tx}, ${ty})"><text x="${tx}" y="${ty+3}" text-anchor="middle" class="label-cam" style="fill:${isA?'#000':'#fff'}">${key}</text><text x="${tx}" y="${ty+16}" text-anchor="middle" class="label-anglo" style="fill:${isA?'#333':'rgba(255,255,255,0.6)'}">${DATA[key]}</text></g>${m}`;
+}
+
+function setKeyFromWheel(key) {
+  const list = state.mode === 'voz' ? state.voices : state.insts;
+  if (list.length > 0) { updateSong(state.mode, list[0].id, 'key', key); }
+}
+
+function addSong(t) { const id = Date.now(), s = { id, title: `Clip ${t==='voz'?'Voz':'Inst'}`, key: '8A' }; if(t==='voz') state.voices.push(s); else state.insts.push(s); render(); }
+function deleteSong(t, id) { const arr = t==='voz' ? state.voices : state.insts; if(arr.length > 1) { if(t==='voz') state.voices = state.voices.filter(x=>x.id!==id); else state.insts = state.insts.filter(x=>x.id!==id); render(); } }
+function updateSong(t, id, f, v) { const arr = t==='voz' ? state.voices : state.insts; const s = arr.find(x=>x.id===id); if(s) { s[f] = v; render(); } }
+function copyToClipboard(t) { const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); const toast = document.getElementById('toast'); toast.style.opacity = '1'; setTimeout(() => toast.style.opacity = '0', 2000); }
+function setMode(m) { state.mode = m; document.getElementById('modeVoz').classList.toggle('active', m === 'voz'); document.getElementById('modeInst').classList.toggle('active', m === 'inst'); render(); }
+
+window.onload = function() {
+  render();
+  updateCoachUI(state.selectedRel);
+  document.getElementById('coachPanel').classList.toggle('closed', !state.coachOpen);
+};
+</script>
+</body>
+</html>
