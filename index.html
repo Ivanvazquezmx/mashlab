@@ -48,7 +48,6 @@
 
   .container { max-width: 1000px; margin: 0 auto; padding: 12px 12px 120px; }
 
-  /* Navbar */
   .topbar {
     position: sticky; top: 0; z-index: 100;
     background: rgba(5, 5, 10, 0.9);
@@ -63,7 +62,6 @@
   .mode-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
   .mode-legend { font-size: 10px; color: var(--sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
 
-  /* Donación */
   .donation-banner {
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid var(--glass-border);
@@ -71,9 +69,7 @@
     display: flex; align-items: center; justify-content: space-between; gap: 15px;
     backdrop-filter: blur(15px);
   }
-  @media(max-width: 650px) { .donation-banner { flex-direction: column; text-align: center; } }
 
-  /* Paneles */
   .panel {
     background: var(--glass);
     border: 1px solid var(--glass-border);
@@ -101,7 +97,6 @@
     font-size: 14px; width: 100%;
   }
 
-  /* Rueda Camelot */
   .wheel-wrapper {
     display: flex; flex-direction: column; align-items: center;
     background: rgba(0,0,0,0.5); border-radius: 40px; padding: 30px 20px;
@@ -125,7 +120,6 @@
   .segment.ghost { filter: drop-shadow(0 0 12px currentColor); opacity: 1; }
   .segment.active { stroke: #fff; stroke-width: 3px; }
 
-  /* Resultados con Neón */
   .analysis-card {
     background: var(--glass);
     border-radius: 30px; padding: 24px; margin-bottom: 20px;
@@ -151,7 +145,6 @@
     box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 15px currentColor; 
   }
 
-  /* Coach */
   .coach-panel {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid var(--glass-border);
@@ -173,7 +166,6 @@
     border: 1px solid var(--glass-border);
   }
 
-  /* UI Elements */
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
     padding: 12px 20px; border-radius: 16px; border: 1px solid var(--glass-border);
@@ -184,8 +176,8 @@
 
   .marker-group, .label-group { pointer-events: none; }
   .marker-text { font-size: 10px; font-weight: 900; fill: #000; text-shadow: 0 0 2px rgba(255,255,255,0.5); }
-  .label-cam { font-weight: 900; font-size: 15px; }
-  .label-anglo { font-size: 11px; font-weight: 700; opacity: 0.8; }
+  .label-cam { font-weight: 900; font-size: 14px; }
+  .label-anglo { font-size: 10px; font-weight: 700; opacity: 0.8; }
 
   .footer { margin-top: 60px; text-align: center; border-top: 1px solid var(--glass-border); padding: 50px 16px 80px; }
 </style>
@@ -326,8 +318,11 @@ function toggleCoach() {
 }
 
 function getShift(from, to) {
-  let diff = (PC[to] - PC[from] + 12) % 12;
-  return diff > 6 ? diff - 12 : diff;
+  const pcFrom = PC[from];
+  const pcTo = PC[to];
+  let diff = (pcTo - pcFrom + 12) % 12;
+  if (diff > 6) diff -= 12;
+  return diff;
 }
 
 function getTargetKey(guideKey, type) {
@@ -382,8 +377,9 @@ function render() {
 function renderList(type, songs) {
   const container = document.getElementById(type === 'voz' ? 'listV' : 'listI');
   container.innerHTML = '';
+  
   songs.forEach((s, idx) => {
-    const isG = state.mode === type && idx === 0;
+    const isG = (state.mode === type && idx === 0);
     const div = document.createElement('div');
     div.className = `song-item ${isG ? 'is-guide' : ''}`;
     div.innerHTML = `
@@ -400,12 +396,12 @@ function renderList(type, songs) {
 function renderAnalysis(guideKey) {
   const container = document.getElementById('analysisContainer');
   const targets = state.mode === 'voz' ? state.insts : state.voices;
+  
   if (!targets.length) { container.innerHTML = ""; return; }
   container.innerHTML = targets.map(song => {
     const tk = getTargetKey(guideKey, state.selectedRel);
     const sh = getShift(song.key, tk);
     const isSel = state.selectedRel;
-    const cat = ['Exacta','Relativa','Subida','Sutil'].includes(isSel) ? 'match' : (isSel==='Energía'?'energy':'pitchpro');
     
     return `<div class="analysis-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
@@ -437,12 +433,15 @@ function drawWheel(guideKey) {
   const target = document.getElementById('wheelTarget');
   const size = 500, cx = 250, cy = 250, rO = 235, rM = 155, rIn = 85;
   let html = `<svg viewBox="0 0 ${size} ${size}" class="camelot-wheel">`;
+
   for(let i=0; i<12; i++) {
     const s = (i * 30) - 15, e = ((i + 1) * 30) - 15;
     html += drawSeg(cx, cy, rM, rO, s, e, `${i+1}B`, guideKey);
     html += drawSeg(cx, cy, rIn, rM, s, e, `${i+1}A`, guideKey);
   }
-  target.innerHTML = html + `</svg>`;
+
+  html += `</svg>`;
+  target.innerHTML = html;
 }
 
 function drawSeg(cx, cy, rin, rout, s, e, key, guide) {
@@ -452,9 +451,9 @@ function drawSeg(cx, cy, rin, rout, s, e, key, guide) {
   const x3 = cx + rin * Math.cos(e * rad), y3 = cy + rin * Math.sin(e * rad);
   const x4 = cx + rin * Math.cos(s * rad), y4 = cy + rin * Math.sin(s * rad);
   
-  const isA = key === guide;
+  const isA = (key === guide);
   const currentTarget = getTargetKey(guide, state.selectedRel);
-  const isGhost = key === currentTarget && !isA;
+  const isGhost = (key === currentTarget && !isA);
   const tk = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].map(t => getTargetKey(guide, t));
   const isCompatible = tk.includes(key);
   
@@ -469,29 +468,37 @@ function drawSeg(cx, cy, rin, rout, s, e, key, guide) {
   else if (isCompatible) {
     const type = ['Exacta','Relativa','Subida','Sutil','Energía','PitchPro'].find(t => getTargetKey(guide, t) === key);
     if(['Exacta','Relativa','Subida','Sutil'].includes(type)) fill = "rgba(0, 255, 136, 0.2)";
-    else if(type==='Energía') fill = "rgba(255, 204, 0, 0.2)";
+    else if(type==='Energía') fill = "rgba(245, 158, 11, 0.2)";
     else fill = "rgba(0, 229, 255, 0.2)";
   }
 
-  const mid = (s + e) / 2, tx = cx + ((rin + rout) / 2) * Math.cos(mid * rad), ty = cy + ((rin + rout) / 2) * Math.sin(mid * rad);
+  const mid = (s + e) / 2;
+  const tx = cx + ((rin + rout) / 2) * Math.cos(mid * rad);
+  const ty = cy + ((rin + rout) / 2) * Math.sin(mid * rad);
   const vP = state.voices.find(v => v.key === key), bP = state.insts.find(i => i.key === key);
   
   let m = ""; 
   if(vP) m += `<circle cx="${tx-14}" cy="${ty-16}" r="10" fill="var(--ok)"/><text x="${tx-14}" y="${ty-12.5}" text-anchor="middle" class="marker-text">V</text>`;
   if(bP) m += `<circle cx="${tx+14}" cy="${ty-16}" r="10" fill="var(--blue)"/><text x="${tx+14}" y="${ty-12.5}" text-anchor="middle" class="marker-text">B</text>`;
   
+  // Contra-rotación de 15 grados para que el texto sea horizontal a pesar de la rotación del SVG padre
   return `<g class="segment-group" onclick="setKeyFromWheel('${key}')">
     <path d="M ${x1} ${y1} A ${rout} ${rout} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rin} ${rin} 0 0 0 ${x4} ${y4} Z" fill="${fill}" class="segment ${isGhost?'ghost':''} ${isA?'active':''}" />
-    <g class="label-group"><text x="${tx}" y="${ty+4}" text-anchor="middle" class="label-cam" style="fill:${isA?'#000':'#fff'}">${key}</text><text x="${tx}" y="${ty+18}" text-anchor="middle" class="label-anglo" style="fill:${isA?'#333':'rgba(255,255,255,0.6)'}">${DATA[key]}</text></g>
+    <g transform="rotate(15, ${tx}, ${ty})">
+      <text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" class="label-cam" style="fill:${isA?'#000':'#fff'}">
+        <tspan x="${tx}" dy="-0.4em">${key}</tspan>
+        <tspan x="${tx}" dy="1.2em" class="label-anglo" style="fill:${isA?'#333':'rgba(255,255,255,0.6)'}">${DATA[key]}</tspan>
+      </text>
+    </g>
     <g class="marker-group">${m}</g>
   </g>`;
 }
 
-function setKeyFromWheel(key) { const list = state.mode==='voz'?state.voices:state.insts; if(list.length) updateSong(state.mode, list[0].id, 'key', key); }
+function setKeyFromWheel(key) { const list = (state.mode==='voz'?state.voices:state.insts); if(list.length) updateSong(state.mode, list[0].id, 'key', key); }
 function setMode(m) { state.mode = m; document.getElementById('modeVoz').classList.add('active'); document.getElementById('modeInst').classList.remove('active'); if(m==='inst'){ document.getElementById('modeInst').classList.add('active'); document.getElementById('modeVoz').classList.remove('active'); } render(); }
 function addSong(t) { const id = Date.now(), s = { id, title: `Pista ${t==='voz'?'Voz':'Inst'}`, key: '8A' }; if(t==='voz') state.voices.push(s); else state.insts.push(s); render(); }
-function deleteSong(t, id) { const arr = t==='voz' ? state.voices : state.insts; if(arr.length > 1) { if(t==='voz') state.voices = state.voices.filter(x=>x.id!==id); else state.insts = state.insts.filter(x=>x.id!==id); render(); } }
-function updateSong(t, id, f, v) { const arr = t==='voz' ? state.voices : state.insts; const s = arr.find(x=>x.id===id); if(s) { s[f] = v; render(); } }
+function deleteSong(t, id) { const arr = (t==='voz' ? state.voices : state.insts); if(arr.length > 1) { if(t==='voz') state.voices = state.voices.filter(x=>x.id!==id); else state.insts = state.insts.filter(x=>x.id!==id); render(); } }
+function updateSong(t, id, f, v) { const arr = (t==='voz' ? state.voices : state.insts); const s = arr.find(x=>x.id===id); if(s) { s[f] = v; render(); } }
 function copyToClipboard(t) { const el = document.createElement('textarea'); el.value = t; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); const toast = document.getElementById('toast'); toast.style.opacity = '1'; setTimeout(() => toast.style.opacity = '0', 2000); }
 
 window.onload = () => {
